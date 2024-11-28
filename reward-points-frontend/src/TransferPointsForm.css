@@ -1,0 +1,20 @@
+/* TransferPointsForm.css */
+form {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+  
+  button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+  }
+  
+  button:hover {
+    background-color: #218838;
+  }
