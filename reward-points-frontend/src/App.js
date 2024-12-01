@@ -5,6 +5,7 @@ import AddEntrepriseForm from './components/AddEntrepriseForm';
 import TransactionsList from './components/TransactionsList';
 import UsersList from './components/UsersList';
 import EntreprisesList from './components/EntreprisesList';
+import BlockchainEntriesList from './components/BlockchainEntriesList';
 import './App.css';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
   const [currentView, setCurrentView] = useState('transfer'); // Vue par défaut
   const [message, setMessage] = useState('');
 
+  // Fetch data for users
   const fetchUsers = async () => {
     try {
       const response = await fetch('http://127.0.0.1:5000/users');
@@ -25,6 +27,7 @@ function App() {
     }
   };
 
+  // Fetch data for entreprises
   const fetchEntreprises = async () => {
     try {
       const response = await fetch('http://127.0.0.1:5000/entreprises');
@@ -36,6 +39,7 @@ function App() {
     }
   };
 
+  // Fetch data for transactions
   const fetchTransactions = async () => {
     try {
       const response = await fetch('http://127.0.0.1:5000/transactions');
@@ -47,6 +51,7 @@ function App() {
     }
   };
 
+  // Fetch all data on initial render
   useEffect(() => {
     fetchUsers();
     fetchEntreprises();
@@ -63,8 +68,11 @@ function App() {
         <button onClick={() => setCurrentView('transactions')}>Voir les Transactions</button>
         <button onClick={() => setCurrentView('users')}>Voir les Utilisateurs</button>
         <button onClick={() => setCurrentView('entreprises')}>Voir les Entreprises</button>
+        <button onClick={() => setCurrentView('blockchain')}>Voir la Blockchain</button>
       </nav>
-
+      <div className="content">
+         {currentView === 'blockchain' && <BlockchainEntriesList />}
+      </div>
       {message && <p style={{ color: 'red' }}>{message}</p>}
 
       <div className="content">
@@ -74,8 +82,11 @@ function App() {
         {currentView === 'transactions' && <TransactionsList transactions={transactions} />}
         {currentView === 'users' && <UsersList users={users} />}
         {currentView === 'entreprises' && <EntreprisesList entreprises={entreprises} />}
+        {currentView === 'blockchain' && <BlockchainEntriesList />}
       </div>
     </div>
+
+    
   );
 }
 

@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask import request
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_apscheduler import APScheduler
@@ -7,6 +8,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timezone
 import hashlib
 import os
+from blockchain_integration import add_hash_to_blockchain, get_hash_from_blockchain
+
 
 # Initialisation de l'application Flask
 tpeApp = Flask(__name__)
@@ -87,6 +90,10 @@ def generate_global_hash():
 # Route pour ajouter un utilisateur
 @tpeApp.route('/add_user', methods=['POST'])
 def add_user():
+
+    """
+    Ajoute un utilisateur et envoie un hash localement et à la blockchain.
+    """
     data = request.get_json()
     name = data.get('name')
     email = data.get('email')
@@ -131,39 +138,57 @@ def add_entreprise():
 # Route pour transférer des points avec génération de hash
 @tpeApp.route('/transfer_points', methods=['POST'])
 def transfer_points():
+    """
+      Transfère des points entre utilisateurs et enregistre un hash de la transaction
+      dans la blockchain.
+    """
+
     data = request.get_json()
     sender_id = data.get('sender_id')
     receiver_id = data.get('receiver_id')
     amount = data.get('amount')
 
     if not sender_id or not receiver_id or not amount:
-        return jsonify({"error": "Données de transfert incomplètes"}), 400
+        return jsonify({"error": "Données de transfert incomplètes"}), 400 
 
     sender = User.query.get_or_404(sender_id)
     receiver = User.query.get_or_404(receiver_id)
 
     if sender.points < amount:
-        return jsonify({"error": "Solde insuffisant"}), 400
-
+      return jsonify({"error": "Solde insuffisant"}), 400
+  
+    # Mise à jour des points des utilisateurs
     sender.points -= amount
     receiver.points += amount
 
+# Enregistrement de la transaction
     transaction = Transaction(sender_id=sender.id, receiver_id=receiver.id, amount=amount)
     db.session.add(transaction)
     db.session.commit()
 
-    hash_data = f'{transaction.id}{transaction.timestamp}'.encode()
-    hash_value = hashlib.sha256(hash_data).hexdigest()
+  # Génération du hash pour la transaction
+    hash_data = f"{transaction.id}{transaction.sender_id}{transaction.receiver_id}{transaction.amount}{transaction.timestamp}"
+    hash_value = hashlib.sha256(hash_data.encode()).hexdigest()
 
-    blockchain_entry = Blockchain(id_transaction=transaction.id, hash_transaction=hash_value)
-    db.session.add(blockchain_entry)
-    db.session.commit()
+    # Envoi automatique du hash à la blockchain
+    try:
+        blockchain_hash = add_hash_to_blockchain(hash_value)
 
-    return jsonify({
-        "message": "Transfert réussi",
-        "transaction_id": transaction.id,
-        "hash": hash_value
-    })
+        # Enregistrement dans la table Blockchain
+        blockchain_entry = Blockchain(
+            id_transaction=transaction.id,
+            hash_transaction=blockchain_hash
+        )
+        db.session.add(blockchain_entry)
+        db.session.commit()
+        return jsonify({
+            "message": "Transfert réussi",
+            "transaction_id": transaction.id,
+            "hash_local": hash_value,
+            "blockchain_hash": blockchain_hash
+        }), 200
+    except Exception as e:
+        return jsonify({"error": f"Erreur lors de l'ajout du hash à la blockchain : {str(e)}"}), 500
 
 # Routes pour récupérer les données
 @tpeApp.route('/transactions', methods=['GET'])
@@ -202,6 +227,51 @@ def get_entreprises():
 def get_routes():
     return jsonify({rule.rule: list(rule.methods) for rule in tpeApp.url_map.iter_rules()})
 
+# Routes API
+@tpeApp.route('/blockchain/add_hash', methods=['POST'])
+def add_hash_route():
+    data = request.get_json()
+    transaction_hash = data.get('transaction_id')
+    hash_to_add = data.get('hash')
+
+    if not data or 'transaction_id' not in data or 'hash' not in data:
+        return jsonify({"error": "transaction_id et hash sont requis"}), 400
+    transaction_id = data['transaction_id']
+    hash_to_add = data['hash']
+
+        # Appeler votre fonction pour ajouter le hash
+    result = add_hash_to_blockchain(hash_to_add)
+
+
+    try:
+        #ajout du hash sur la blockchain
+        blockchain_hash = add_hash_to_blockchain(hash_to_add)
+
+        # Enregistrer le hash dans la table Blockchain
+        new_blockchain_entry = Blockchain(
+            id_transaction=transaction_id,
+            hash_transaction=blockchain_hash
+        )
+        db.session.add(new_blockchain_entry)
+        db.session.commit()
+        
+        #tx_hash = add_hash_to_blockchain(transaction_hash)
+        return jsonify({"message": "Hash ajouté avec succès", "blockchain_hash": blockchain_hash}), 201
+    
+    except Exception as e:
+        return jsonify({"error": f"Erreur lors de l'ajout du hash : {str(e)}"}), 500
+
+
+
+@tpeApp.route('/blockchain/get_hash/<int:id>', methods=['GET'])
+def get_hash_route(id):
+    try:
+        hash_value = get_hash_from_blockchain(id)
+        return jsonify({"id": id, "hash": hash_value})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
 # Configuration et démarrage du planificateur
 class Config:
     SCHEDULER_API_ENABLED = True
@@ -211,11 +281,32 @@ scheduler = APScheduler(BackgroundScheduler())
 scheduler.init_app(tpeApp)
 
 # Tâche périodique
-@scheduler.task('interval', id='global_hash_task', seconds=100)  # Toutes les 100 secondes
+@scheduler.task('interval', id='global_hash_task', seconds=300)  # Toutes les 300 secondes
 def scheduled_generate_hash():
+    """
+    Génère un hash global de l'état actuel des utilisateurs, entreprises et transactions,
+    puis l'envoie automatiquement à la blockchain.
+    """
     with tpeApp.app_context():
         hash_value = generate_global_hash()
         print(f"Hash global généré : {hash_value} à {datetime.now(timezone.utc)}")
+
+        try:
+            # Envoi du hash global à la blockchain
+            blockchain_hash = add_hash_to_blockchain(hash_value)
+
+            # Enregistrement dans la table Blockchain
+            blockchain_entry = Blockchain(
+                id_transaction=None,
+                hash_transaction=blockchain_hash
+            )
+            db.session.add(blockchain_entry)
+            db.session.commit()
+
+            print(f"Hash global enregistré et envoyé à la blockchain : {blockchain_hash}")
+        except Exception as e:
+            print(f"Erreur lors de l'envoi du hash global à la blockchain : {str(e)}")
+
 
 scheduler.start()
 
@@ -228,6 +319,16 @@ def get_blockchain_entries():
         "hash": entry.hash_transaction,
         "date": entry.date_enregistrement
     } for entry in blockchain_entries])
+
+@tpeApp.route('/blockchain/transaction_details/<tx_hash>', methods=['GET'])
+def get_transaction_details_route(tx_hash):
+    try:
+        details = get_transaction_details(tx_hash)
+        return jsonify({'status': 'success', 'transaction_details': details}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 
 if __name__ == '__main__':
     tpeApp.run(debug=True)
