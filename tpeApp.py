@@ -281,7 +281,7 @@ scheduler = APScheduler(BackgroundScheduler())
 scheduler.init_app(tpeApp)
 
 # Tâche périodique
-@scheduler.task('interval', id='global_hash_task', seconds=300)  # Toutes les 300 secondes
+@scheduler.task('interval', id='global_hash_task', seconds=5300)  # Toutes les 300 secondes
 def scheduled_generate_hash():
     """
     Génère un hash global de l'état actuel des utilisateurs, entreprises et transactions,
