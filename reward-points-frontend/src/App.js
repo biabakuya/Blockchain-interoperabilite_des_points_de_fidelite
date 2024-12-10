@@ -7,6 +7,7 @@ import UsersList from './components/UsersList';
 import EntreprisesList from './components/EntreprisesList';
 import BlockchainEntriesList from './components/BlockchainEntriesList';
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -60,33 +61,38 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Échangeur de Points</h1>
-      <nav>
-        <button onClick={() => setCurrentView('transfer')}>Transférer des Points</button>
-        <button onClick={() => setCurrentView('addUser')}>Ajouter un Utilisateur</button>
-        <button onClick={() => setCurrentView('addEntreprise')}>Ajouter une Entreprise</button>
-        <button onClick={() => setCurrentView('transactions')}>Voir les Transactions</button>
-        <button onClick={() => setCurrentView('users')}>Voir les Utilisateurs</button>
-        <button onClick={() => setCurrentView('entreprises')}>Voir les Entreprises</button>
-        <button onClick={() => setCurrentView('blockchain')}>Voir la Blockchain</button>
+      <header className="bg-primary text-white py-3">
+        <div className="container">
+          <h1 className="text-center">Échangeur de Points</h1>
+        </div>
+      </header>
+      <nav className="bg-light py-2">
+        <div className="container d-flex flex-wrap justify-content-center gap-3">
+          <button className="btn btn-outline-primary" onClick={() => setCurrentView('transfer')}>Transférer des Points</button>
+          <button className="btn btn-outline-primary" onClick={() => setCurrentView('addUser')}>Ajouter un Utilisateur</button>
+          <button className="btn btn-outline-primary" onClick={() => setCurrentView('addEntreprise')}>Ajouter une Entreprise</button>
+          <button className="btn btn-outline-primary" onClick={() => setCurrentView('transactions')}>Voir les Transactions</button>
+          <button className="btn btn-outline-primary" onClick={() => setCurrentView('users')}>Voir les Utilisateurs</button>
+          <button className="btn btn-outline-primary" onClick={() => setCurrentView('entreprises')}>Voir les Entreprises</button>
+          <button className="btn btn-outline-primary" onClick={() => setCurrentView('blockchain')}>Voir la Blockchain</button>
+        </div>
       </nav>
-      <div className="content">
-         {currentView === 'blockchain' && <BlockchainEntriesList />}
-      </div>
-      {message && <p style={{ color: 'red' }}>{message}</p>}
-
-      <div className="content">
-        {currentView === 'transfer' && <TransferPointsForm users={users} />}
-        {currentView === 'addUser' && <AddUserForm entreprises={entreprises} fetchUsers={fetchUsers} />}
-        {currentView === 'addEntreprise' && <AddEntrepriseForm fetchEntreprises={fetchEntreprises} />}
-        {currentView === 'transactions' && <TransactionsList transactions={transactions} />}
-        {currentView === 'users' && <UsersList users={users} />}
-        {currentView === 'entreprises' && <EntreprisesList entreprises={entreprises} />}
-        {currentView === 'blockchain' && <BlockchainEntriesList />}
-      </div>
+      <main className="container mt-4">
+        {message && <p className="alert alert-danger">{message}</p>}
+        <div className="content">
+          {currentView === 'transfer' && <TransferPointsForm users={users} />}
+          {currentView === 'addUser' && <AddUserForm entreprises={entreprises} fetchUsers={fetchUsers} />}
+          {currentView === 'addEntreprise' && <AddEntrepriseForm fetchEntreprises={fetchEntreprises} />}
+          {currentView === 'transactions' && <TransactionsList transactions={transactions} />}
+          {currentView === 'users' && <UsersList users={users} />}
+          {currentView === 'entreprises' && <EntreprisesList entreprises={entreprises} />}
+          {currentView === 'blockchain' && <BlockchainEntriesList />}
+        </div>
+      </main>
+      <footer className="bg-dark text-white text-center py-3 mt-4">
+        <p>&copy; 2024 Échangeur de Points. Tous droits réservés.</p>
+      </footer>
     </div>
-
-    
   );
 }
 

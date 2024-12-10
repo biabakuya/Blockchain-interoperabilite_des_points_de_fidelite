@@ -1,29 +1,109 @@
 .App {
-  text-align: center;
-  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 nav {
-  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 15px;
+  gap: 10px;
+  background-color: #01070d;
+  border-radius: 0 0 5px 10px;
 }
 
-nav button {
-  margin: 5px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+nav .btn {
+  color: #274424;
+  font-weight: bold;
+  padding: 12px 25px; /* Augmenté */
+  border-radius: 10px; /* Arrondis plus doux */
+  transition: all 0.3s ease; /* Transition plus fluide */
 }
 
-nav button:hover {
-  background-color: #0056b3;
+nav .btn:hover {
+  background-color: #051322;
+  transform: translateY(-2px) scale(1.09); /* Effet de léger rebond */
 }
 
 .content {
+  flex: 1;
+  display: flex;
+  justify-content: center; /* Centre horizontalement */
+  align-items: center; /* Centre verticalement */
   padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container {
+  max-width: 500px;
+  width: 100%; /* S'assure que le formulaire est bien responsive */
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centre tous les éléments horizontalement */
+  text-align: center; /* Centre les textes dans leurs blocs */
+}
+
+.form-container h2 {
+  font-size: 1.5rem;
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  width: 100%;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centre les labels et inputs */
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-align: center; /* Centre les labels */
+}
+
+.form-group select,
+.form-group input {
+  width: 80%; /* Réduit la largeur des champs pour plus d'esthétique */
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  text-align: center; /* Centre le texte dans les champs */
+}
+
+.btn-submit {
+  display: block;
+  width: 80%;
+  padding: 10px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: background-color 0.2s, transform 0.2s;
+  margin-top: 15px;
+}
+
+.btn-submit:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+footer {
+  background-color: #343a40;
+  color: #ffffff;
+  padding: 15px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  border-radius: 10px 10px 0 0;
+  margin-top: 20px;
 }
