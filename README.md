@@ -38,7 +38,7 @@ L'architecture repose sur une combinaison de blockchain, de backend REST et d'un
 ### Prérequis
 
 - Node.js
-- Python 3.x
+- Python 3.8
 - Docker
 - MetaMask configuré pour le testnet Sepolia
 
@@ -47,7 +47,7 @@ L'architecture repose sur une combinaison de blockchain, de backend REST et d'un
 1. Clonez le répertoire :
    ```bash
    git clone https://github.com/biabakuya/Blockchain-interoperabilite_des_points_de_fidelite.git
-   cd blockchain-loyalty-points
+   cd Blockchain-interoperabilite_des_points_de_fidelite
    ```
 
 2. Lancez les conteneurs Docker :
