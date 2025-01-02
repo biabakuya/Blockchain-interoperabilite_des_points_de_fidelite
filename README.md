@@ -46,7 +46,7 @@ L'architecture repose sur une combinaison de blockchain, de backend REST et d'un
 
 1. Clonez le répertoire :
    ```bash
-   git clone https://github.com/username/blockchain-loyalty-points.git
+   git clone https://github.com/biabakuya/Blockchain-interoperabilite_des_points_de_fidelite.git
    cd blockchain-loyalty-points
    ```
 
